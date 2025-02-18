@@ -35,7 +35,7 @@ bullets = []
 
 # Zombíci
 zombies = []
-zombie_speed = 2
+zombie_speed = 2 * (2 / 3)  # Zpomalení zombíků o třetinu
 
 # Vlna
 wave = {
