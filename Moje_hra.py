@@ -50,9 +50,6 @@ store = {
     "money": 0
 }
 
-# Power-upy
-powerups = []
-
 # Časovač
 clock = pygame.time.Clock()
 
@@ -119,13 +116,14 @@ while running:
 
     # Zobrazení textu (vlna, životy, peníze)
     font = pygame.font.Font(None, 36)
-    wave_text = font.render(f"Vlna: {wave['current']}", True, WHITE)
-    money_text = font.render(f"Měna: {store['money']}", True, WHITE)
-    lives_text = font.render(f"Životy: {player['lives']}", True, WHITE)
     
-    screen.blit(wave_text, (10, 10))
-    screen.blit(money_text, (10, 50))
-    screen.blit(lives_text, (WIDTH - 150, 10))
+    # Měna úplně vlevo nahoře
+    money_text = font.render(f"Měna: {store['money']}", True, BLUE)
+    screen.blit(money_text, (10, 10))
+
+    # Vlna úplně vpravo nahoře
+    wave_text = font.render(f"Vlna: {wave['current']}", True, BLUE)
+    screen.blit(wave_text, (WIDTH - 150, 10))
 
     # Konec vlny
     if wave["zombies_left"] <= 0 and len(zombies) == 0:
@@ -162,4 +160,3 @@ while running:
     clock.tick(60)
 
 pygame.quit()
- 
