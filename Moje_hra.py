@@ -90,8 +90,8 @@ while running:
         if bullet["x"] > WIDTH:
             bullets.remove(bullet)
 
-    # Spawn zombíků
-    if wave["zombies_left"] > 0 and random.randint(1, 40) == 1:
+    # Spawn zombíků (zpomaleno na polovinu)
+    if wave["zombies_left"] > 0 and random.randint(1, 80) == 1:  # Změněná pravděpodobnost na 80
         # Náhodné pozice pro zombíka
         zombie_x = WIDTH
         zombie_y = random.randint(150, HEIGHT - 50)
@@ -128,12 +128,20 @@ while running:
     for zombie in zombies:
         pygame.draw.rect(screen, GREEN, (zombie["x"], zombie["y"], 40, 50))
 
-    # Zobrazení textu (vlna, životy, peníze) s černou barvou
+    # Zobrazení textu (životy, měna, vlna a zbývající zombíci) s černou barvou
     font = pygame.font.Font(None, 36)
-    
-    # Měna úplně vlevo nahoře
+
+    # Životy úplně vlevo nahoře
+    lives_text = font.render(f"Životy: {player['lives']}", True, BLACK)
+    screen.blit(lives_text, (10, 10))
+
+    # Měna napravo od životů
     money_text = font.render(f"Měna: {store['money']}", True, BLACK)
-    screen.blit(money_text, (10, 10))
+    screen.blit(money_text, (150, 10))
+
+    # Zbývající zombíci
+    remaining_zombies_text = font.render(f"Zombíci: {wave['zombies_left']}", True, BLACK)
+    screen.blit(remaining_zombies_text, (WIDTH - 300, 10))
 
     # Vlna úplně vpravo nahoře
     wave_text = font.render(f"Vlna: {wave['current']}", True, BLACK)
@@ -174,3 +182,4 @@ while running:
     clock.tick(60)
 
 pygame.quit()
+
