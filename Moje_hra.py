@@ -16,6 +16,7 @@ background = pygame.image.load("background.png")
 WHITE = (255, 255, 255)
 RED = (200, 0, 0)
 GREEN = (0, 100, 0)
+BLACK = (0, 0, 0)  # Černá barva pro text
 
 # Hráč
 player = {
@@ -114,15 +115,15 @@ while running:
     for zombie in zombies:
         pygame.draw.rect(screen, GREEN, (zombie["x"], zombie["y"], 40, 50))
 
-    # Zobrazení textu (vlna, životy, peníze)
+    # Zobrazení textu (vlna, životy, peníze) s černou barvou
     font = pygame.font.Font(None, 36)
     
     # Měna úplně vlevo nahoře
-    money_text = font.render(f"Měna: {store['money']}", True, BLUE)
+    money_text = font.render(f"Měna: {store['money']}", True, BLACK)
     screen.blit(money_text, (10, 10))
 
     # Vlna úplně vpravo nahoře
-    wave_text = font.render(f"Vlna: {wave['current']}", True, BLUE)
+    wave_text = font.render(f"Vlna: {wave['current']}", True, BLACK)
     screen.blit(wave_text, (WIDTH - 150, 10))
 
     # Konec vlny
