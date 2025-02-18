@@ -54,6 +54,13 @@ store = {
 # Časovač
 clock = pygame.time.Clock()
 
+# Funkce pro kontrolu, jestli je pozice volná
+def is_position_free(x, y):
+    for zombie in zombies:
+        if abs(zombie["x"] - x) < 40 and abs(zombie["y"] - y) < 50:
+            return False
+    return True
+
 # Hlavní smyčka
 running = True
 while running:
@@ -85,8 +92,14 @@ while running:
 
     # Spawn zombíků
     if wave["zombies_left"] > 0 and random.randint(1, 40) == 1:
-        zombies.append({"x": WIDTH, "y": random.randint(150, HEIGHT - 50), "speed": zombie_speed * wave["speed_multiplier"]})
-        wave["zombies_left"] -= 1
+        # Náhodné pozice pro zombíka
+        zombie_x = WIDTH
+        zombie_y = random.randint(150, HEIGHT - 50)
+
+        # Ověření, zda pozice není obsazena jiným zombíkem
+        if is_position_free(zombie_x, zombie_y):
+            zombies.append({"x": zombie_x, "y": zombie_y, "speed": zombie_speed * wave["speed_multiplier"]})
+            wave["zombies_left"] -= 1
 
     # Pohyb zombíků
     for zombie in zombies[:]:
