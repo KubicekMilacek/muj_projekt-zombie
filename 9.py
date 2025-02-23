@@ -47,7 +47,6 @@ wave = {
 # Obchod
 store = {
     "weapon_upgrade_cost": 10,
-    "fire_rate_upgrade": 100,  # Snížení cooldownu střelby
     "money": 0
 }
 
@@ -182,4 +181,3 @@ while running:
     clock.tick(60)
 
 pygame.quit()
-
