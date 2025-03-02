@@ -130,21 +130,22 @@ while running:
     # Zobrazení textu (životy, měna, vlna a zbývající zombíci) s černou barvou
     font = pygame.font.Font(None, 36)
 
-    # Životy úplně vlevo nahoře
+    # Bílá lišta nahoře
+    pygame.draw.rect(screen, WHITE, (0, 0, WIDTH, 50))  # Bílé pozadí pro texty
+
+    # Životy a měna vedle sebe
     lives_text = font.render(f"Životy: {player['lives']}", True, BLACK)
-    screen.blit(lives_text, (10, 10))
-
-    # Měna napravo od životů
     money_text = font.render(f"Měna: {store['money']}", True, BLACK)
-    screen.blit(money_text, (150, 10))
 
-    # Zbývající zombíci
+    screen.blit(lives_text, (10, 10))  # Životy vlevo
+    screen.blit(money_text, (150, 10))  # Měna vedle životů
+
+    # Zbývající zombíci a vlna vedle sebe v pravém horním rohu
     remaining_zombies_text = font.render(f"Zombíci: {wave['zombies_left']}", True, BLACK)
-    screen.blit(remaining_zombies_text, (WIDTH - 300, 10))
-
-    # Vlna úplně vpravo nahoře
     wave_text = font.render(f"Vlna: {wave['current']}", True, BLACK)
-    screen.blit(wave_text, (WIDTH - 150, 10))
+
+    screen.blit(remaining_zombies_text, (WIDTH - 300, 10))  # Zbývající zombíci vpravo
+    screen.blit(wave_text, (WIDTH - 150, 10))  # Vlna vedle zombíků
 
     # Konec vlny
     if wave["zombies_left"] <= 0 and len(zombies) == 0:
