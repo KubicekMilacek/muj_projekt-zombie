@@ -12,6 +12,9 @@ pygame.display.set_caption("Zombie Shooter")
 # Načtení pozadí
 background = pygame.image.load("background.png")
 
+# Načtení obrázku obchodu
+store_image = pygame.image.load("store.png")
+
 # Barvy
 WHITE = (255, 255, 255)
 RED = (200, 0, 0)
@@ -60,8 +63,24 @@ def is_position_free(x, y):
             return False
     return True
 
+# Funkce pro zobrazení obchodu
+def show_store():
+    screen.blit(store_image, (0, 0))
+    close_button = pygame.Rect(WIDTH - 40, 10, 30, 30)  # Červený křížek pro zavření
+    pygame.draw.rect(screen, RED, close_button)  # Kreslení křížku
+
+    # Zobrazit text
+    font = pygame.font.Font(None, 36)
+    message = font.render("Zavřít obchod (klikněte na křížek)", True, WHITE)
+    screen.blit(message, (WIDTH // 2 - 150, HEIGHT // 2))
+
+    pygame.display.flip()
+
+    return close_button
+
 # Hlavní smyčka
 running = True
+in_store = False  # Zda je hráč v obchodě
 while running:
     screen.blit(background, (0, 0))
     current_time = pygame.time.get_ticks()
@@ -71,111 +90,118 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-    # Pohyb hráče
-    keys = pygame.key.get_pressed()
-    if keys[pygame.K_UP] and player["y"] > 120:
-        player["y"] -= player["speed"]
-    if keys[pygame.K_DOWN] and player["y"] < HEIGHT - player["height"]:
-        player["y"] += player["speed"]
+    if in_store:
+        # Pokud je hráč v obchodě, zobraz obchod
+        close_button = show_store()
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if close_button.collidepoint(event.pos):
+                    in_store = False  # Zavření obchodu
+            if event.type == pygame.QUIT:
+                running = False
+                in_store = False
 
-    # Střelba
-    if keys[pygame.K_SPACE] and current_time - player["last_shot"] >= player["fire_rate"]:
-        bullets.append({"x": player["x"] + player["width"], "y": player["y"] + player["height"] // 2, "speed": 7})
-        player["last_shot"] = current_time
+    else:
+        # Pohyb hráče
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_UP] and player["y"] > 120:
+            player["y"] -= player["speed"]
+        if keys[pygame.K_DOWN] and player["y"] < HEIGHT - player["height"]:
+            player["y"] += player["speed"]
 
-    # Pohyb střel
-    for bullet in bullets[:]:
-        bullet["x"] += bullet["speed"]
-        if bullet["x"] > WIDTH:
-            bullets.remove(bullet)
+        # Střelba
+        if keys[pygame.K_SPACE] and current_time - player["last_shot"] >= player["fire_rate"]:
+            bullets.append({"x": player["x"] + player["width"], "y": player["y"] + player["height"] // 2, "speed": 7})
+            player["last_shot"] = current_time
 
-    # Spawn zombíků (zpomaleno na polovinu)
-    if wave["zombies_left"] > 0 and random.randint(1, 80) == 1:  # Změněná pravděpodobnost na 80
-        # Náhodné pozice pro zombíka
-        zombie_x = WIDTH
-        zombie_y = random.randint(150, HEIGHT - 50)
-
-        # Ověření, zda pozice není obsazena jiným zombíkem
-        if is_position_free(zombie_x, zombie_y):
-            zombies.append({"x": zombie_x, "y": zombie_y, "speed": zombie_speed * wave["speed_multiplier"]})
-            wave["zombies_left"] -= 1
-
-    # Pohyb zombíků
-    for zombie in zombies[:]:
-        zombie["x"] -= zombie["speed"]
-        if zombie["x"] < 70:
-            player["lives"] -= 1
-            zombies.remove(zombie)
-
-    # Kolize střel a zombíků
-    for bullet in bullets[:]:
-        for zombie in zombies[:]:
-            if zombie["x"] < bullet["x"] < zombie["x"] + 40 and zombie["y"] < bullet["y"] < zombie["y"] + 50:
+        # Pohyb střel
+        for bullet in bullets[:]:
+            bullet["x"] += bullet["speed"]
+            if bullet["x"] > WIDTH:
                 bullets.remove(bullet)
+
+        # Spawn zombíků
+        if wave["zombies_left"] > 0 and random.randint(1, 80) == 1:
+            zombie_x = WIDTH
+            zombie_y = random.randint(150, HEIGHT - 50)
+
+            if is_position_free(zombie_x, zombie_y):
+                zombies.append({"x": zombie_x, "y": zombie_y, "speed": zombie_speed * wave["speed_multiplier"]})
+                wave["zombies_left"] -= 1
+
+        # Pohyb zombíků
+        for zombie in zombies[:]:
+            zombie["x"] -= zombie["speed"]
+            if zombie["x"] < 70:
+                player["lives"] -= 1
                 zombies.remove(zombie)
-                store["money"] += 1
-                break
 
-    # Zobrazení hráče
-    pygame.draw.rect(screen, RED, (player["x"], player["y"], player["width"], player["height"]))
+        # Kolize střel a zombíků
+        for bullet in bullets[:]:
+            for zombie in zombies[:]:
+                if zombie["x"] < bullet["x"] < zombie["x"] + 40 and zombie["y"] < bullet["y"] < zombie["y"] + 50:
+                    bullets.remove(bullet)
+                    zombies.remove(zombie)
+                    store["money"] += 1
+                    break
 
-    # Zobrazení střel
-    for bullet in bullets:
-        pygame.draw.rect(screen, WHITE, (bullet["x"], bullet["y"], 10, 5))
+        # Zobrazení hráče
+        pygame.draw.rect(screen, RED, (player["x"], player["y"], player["width"], player["height"]))
 
-    # Zobrazení zombíků
-    for zombie in zombies:
-        pygame.draw.rect(screen, GREEN, (zombie["x"], zombie["y"], 40, 50))
+        # Zobrazení střel
+        for bullet in bullets:
+            pygame.draw.rect(screen, WHITE, (bullet["x"], bullet["y"], 10, 5))
 
-    # Zobrazení textu (životy, měna, vlna a zbývající zombíci) s černou barvou
-    font = pygame.font.Font(None, 36)
+        # Zobrazení zombíků
+        for zombie in zombies:
+            pygame.draw.rect(screen, GREEN, (zombie["x"], zombie["y"], 40, 50))
 
-    # Bílá lišta nahoře
-    pygame.draw.rect(screen, WHITE, (0, 0, WIDTH, 50))  # Bílé pozadí pro texty
+        # Zobrazení textu (životy, měna, vlna a zbývající zombíci)
+        font = pygame.font.Font(None, 36)
 
-    # Životy a měna vedle sebe
-    lives_text = font.render(f"Životy: {player['lives']}", True, BLACK)
-    money_text = font.render(f"Měna: {store['money']}", True, BLACK)
+        # Životy
+        lives_text = font.render(f"Životy: {player['lives']}", True, BLACK)
+        screen.blit(lives_text, (10, 10))
 
-    screen.blit(lives_text, (10, 10))  # Životy vlevo
-    screen.blit(money_text, (150, 10))  # Měna vedle životů
+        # Měna
+        money_text = font.render(f"Měna: {store['money']}", True, BLACK)
+        screen.blit(money_text, (150, 10))
 
-    # Zbývající zombíci a vlna vedle sebe v pravém horním rohu
-    remaining_zombies_text = font.render(f"Zombíci: {wave['zombies_left']}", True, BLACK)
-    wave_text = font.render(f"Vlna: {wave['current']}", True, BLACK)
+        # Zbývající zombíci
+        remaining_zombies_text = font.render(f"Zombíci: {wave['zombies_left']}", True, BLACK)
+        screen.blit(remaining_zombies_text, (WIDTH - 300, 10))
 
-    screen.blit(remaining_zombies_text, (WIDTH - 300, 10))  # Zbývající zombíci vpravo
-    screen.blit(wave_text, (WIDTH - 150, 10))  # Vlna vedle zombíků
+        # Vlna
+        wave_text = font.render(f"Vlna: {wave['current']}", True, BLACK)
+        screen.blit(wave_text, (WIDTH - 150, 10))
 
-    # Konec vlny
-    if wave["zombies_left"] <= 0 and len(zombies) == 0:
-        wave["current"] += 1
-        wave["zombies_left"] = 50
-        wave["speed_multiplier"] *= 1.05  # Zrychlení zombíků o 5 %
+        # Konec vlny
+        if wave["zombies_left"] <= 0 and len(zombies) == 0:
+            wave["current"] += 1
+            wave["zombies_left"] = 50
+            wave["speed_multiplier"] *= 1.05  # Zrychlení zombíků o 5 %
 
-        # Nabídka po vlně
-        waiting = True
-        while waiting:
-            screen.fill((0, 0, 0))
-            message = font.render("1 = obchod, 2 = pokračovat, 3 = ukončit", True, WHITE)
-            screen.blit(message, (WIDTH // 2 - 200, HEIGHT // 2))
-            pygame.display.flip()
+            # Nabídka po vlně
+            waiting = True
+            while waiting:
+                screen.fill((0, 0, 0))
+                message = font.render("1 = obchod, 2 = pokračovat, 3 = ukončit", True, WHITE)
+                screen.blit(message, (WIDTH // 2 - 200, HEIGHT // 2))
+                pygame.display.flip()
 
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    running = False
-                    waiting = False
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_1:  # Obchod
-                        if store["money"] >= store["weapon_upgrade_cost"]:
-                            store["money"] -= store["weapon_upgrade_cost"]
-                            player["fire_rate"] = max(100, player["fire_rate"] - store["fire_rate_upgrade"])
-                        waiting = False
-                    if event.key == pygame.K_2:  # Pokračovat
-                        waiting = False
-                    if event.key == pygame.K_3:  # Ukončit hru
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
                         running = False
                         waiting = False
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_1:  # Obchod
+                            in_store = True
+                            waiting = False
+                        if event.key == pygame.K_2:  # Pokračovat
+                            waiting = False
+                        if event.key == pygame.K_3:  # Ukončit hru
+                            running = False
+                            waiting = False
 
     # Aktualizace obrazovky
     pygame.display.flip()
