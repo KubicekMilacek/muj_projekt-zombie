@@ -50,6 +50,8 @@ wave = {
 # Obchod
 store = {
     "weapon_upgrade_cost": 10,
+    "penetration_level": 0,
+    "second_weapon": False,
     "money": 0
 }
 
@@ -73,6 +75,25 @@ def show_store():
     font = pygame.font.Font(None, 36)
     message = font.render("Zavřít obchod (klikněte na křížek)", True, WHITE)
     screen.blit(message, (WIDTH // 2 - 150, HEIGHT // 2))
+
+    # Vytvoření tabulky s upgrady
+    upgrade_table_rect = pygame.Rect(100, HEIGHT // 2 + 50, 400, 200)
+    pygame.draw.rect(screen, WHITE, upgrade_table_rect)
+    pygame.draw.rect(screen, BLACK, upgrade_table_rect, 3)  # Černé ohraničení tabulky
+
+    # Popisky pro upgrady
+    upgrades = [
+        ("Zrychlení střelby", store["fire_rate_upgrade_cost"], "Střelba bude rychlejší."),
+        ("Penetrace kulek", store["penetration_level"], "Kulka projde až dvěma zombíky."),
+        ("Druhá zbraň", store["second_weapon"], "Budeš střílet dva náboje nad sebou.")
+    ]
+    
+    # Zobrazit upgradey
+    y_offset = 70
+    for upgrade_name, upgrade_level, description in upgrades:
+        text = font.render(f"{upgrade_name}: {upgrade_level} - {description}", True, BLACK)
+        screen.blit(text, (upgrade_table_rect.x + 10, upgrade_table_rect.y + y_offset))
+        y_offset += 40
 
     pygame.display.flip()
 
@@ -181,6 +202,7 @@ while running:
             wave["zombies_left"] = 50
             wave["speed_multiplier"] *= 1.05  # Zrychlení zombíků o 5 %
 
+
             # Nabídka po vlně
             waiting = True
             while waiting:
@@ -197,14 +219,13 @@ while running:
                         if event.key == pygame.K_1:  # Obchod
                             in_store = True
                             waiting = False
-                        if event.key == pygame.K_2:  # Pokračovat
+                        elif event.key == pygame.K_2:  # Pokračovat
                             waiting = False
-                        if event.key == pygame.K_3:  # Ukončit hru
+                        elif event.key == pygame.K_3:  # Ukončit
                             running = False
                             waiting = False
 
-    # Aktualizace obrazovky
-    pygame.display.flip()
+    pygame.display.update()
     clock.tick(60)
 
 pygame.quit()
