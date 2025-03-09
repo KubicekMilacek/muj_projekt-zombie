@@ -19,6 +19,7 @@ store_image = pygame.image.load("store.png")
 WHITE = (255, 255, 255)
 RED = (200, 0, 0)
 GREEN = (0, 100, 0)
+PURPLE = (128, 0, 128)  # Fialová barva
 BLACK = (0, 0, 0)  # Černá barva pro text
 
 # Hráč
@@ -141,13 +142,23 @@ while running:
             if bullet["x"] > WIDTH:
                 bullets.remove(bullet)
 
-        # Spawn zombíků
+        # Spawn zombíků (5 fialových zombíků na vlnu)
         if wave["zombies_left"] > 0 and random.randint(1, 80) == 1:
             zombie_x = WIDTH
             zombie_y = random.randint(150, HEIGHT - 50)
 
+            # Určíme, zda tento zombík bude fialový (5 na vlnu)
+            is_purple = False
+            if wave["zombies_left"] > 45 and random.randint(1, 10) <= 5:  # 5 fialových na 50 zombíků
+                is_purple = True
+
             if is_position_free(zombie_x, zombie_y):
-                zombies.append({"x": zombie_x, "y": zombie_y, "speed": zombie_speed * wave["speed_multiplier"]})
+                zombies.append({
+                    "x": zombie_x,
+                    "y": zombie_y,
+                    "speed": zombie_speed * wave["speed_multiplier"],
+                    "is_purple": is_purple
+                })
                 wave["zombies_left"] -= 1
 
         # Pohyb zombíků
@@ -163,7 +174,12 @@ while running:
                 if zombie["x"] < bullet["x"] < zombie["x"] + 40 and zombie["y"] < bullet["y"] < zombie["y"] + 50:
                     bullets.remove(bullet)
                     zombies.remove(zombie)
-                    store["money"] += 1
+                    
+                    # Výplata peněz
+                    if zombie["is_purple"]:
+                        store["money"] += 8  # Fialoví zombíci dávají více peněz
+                    else:
+                        store["money"] += 1  # Běžní zombíci dávají 1 peníze
                     break
 
         # Zobrazení hráče
@@ -175,7 +191,8 @@ while running:
 
         # Zobrazení zombíků
         for zombie in zombies:
-            pygame.draw.rect(screen, GREEN, (zombie["x"], zombie["y"], 40, 50))
+            color = PURPLE if zombie["is_purple"] else GREEN
+            pygame.draw.rect(screen, color, (zombie["x"], zombie["y"], 40, 50))
 
         # Zobrazení textu (životy, měna, vlna a zbývající zombíci)
         font = pygame.font.Font(None, 36)
