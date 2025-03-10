@@ -51,10 +51,14 @@ wave = {
 # Obchod
 store = {
     "weapon_upgrade_cost": 10,
+    "money": 0,
+    "fire_rate_upgrade_cost": 15,  # ✅ Cena za zrychlení střelby
+    "penetration_upgrade_cost": 20,  # ✅ Cena za penetraci kulek
+    "second_weapon_cost": 30,  # ✅ Cena za druhou zbraň
     "penetration_level": 0,
-    "second_weapon": False,
-    "money": 0
+    "second_weapon": False
 }
+
 
 # Časovač
 clock = pygame.time.Clock()
@@ -77,6 +81,10 @@ def show_store():
     message = font.render("Zavřít obchod (klikněte na křížek)", True, WHITE)
     screen.blit(message, (WIDTH // 2 - 150, HEIGHT // 2))
 
+    # Zobrazení měny
+    money_text = font.render(f"Měna: {store['money']}", True, WHITE)
+    screen.blit(money_text, (WIDTH // 2 - 50, HEIGHT // 2 - 40))
+
     # Vytvoření tabulky s upgrady
     upgrade_table_rect = pygame.Rect(100, HEIGHT // 2 + 50, 400, 200)
     pygame.draw.rect(screen, WHITE, upgrade_table_rect)
@@ -84,7 +92,7 @@ def show_store():
 
     # Popisky pro upgrady
     upgrades = [
-        ("Zrychlení střelby", store["fire_rate_upgrade_cost"], "Střelba bude rychlejší."),
+        ("Zrychlení střelby", store["fire_rate_upgrade_cost"], "Střelba bude rychlejší o 10%."),
         ("Penetrace kulek", store["penetration_level"], "Kulka projde až dvěma zombíky."),
         ("Druhá zbraň", store["second_weapon"], "Budeš střílet dva náboje nad sebou.")
     ]
@@ -96,9 +104,25 @@ def show_store():
         screen.blit(text, (upgrade_table_rect.x + 10, upgrade_table_rect.y + y_offset))
         y_offset += 40
 
+    # Tlačítka pro nákup
+    buy_fire_rate_button = pygame.Rect(600, 100, 150, 50)
+    pygame.draw.rect(screen, GREEN, buy_fire_rate_button)
+    buy_fire_rate_text = font.render(f"Koupit zrychlení ({store['fire_rate_upgrade_cost']})", True, WHITE)
+    screen.blit(buy_fire_rate_text, (buy_fire_rate_button.x + 10, buy_fire_rate_button.y + 10))
+
+    buy_penetration_button = pygame.Rect(600, 170, 150, 50)
+    pygame.draw.rect(screen, GREEN, buy_penetration_button)
+    buy_penetration_text = font.render(f"Koupit penetraci ({store['penetration_upgrade_cost']})", True, WHITE)
+    screen.blit(buy_penetration_text, (buy_penetration_button.x + 10, buy_penetration_button.y + 10))
+
+    buy_second_weapon_button = pygame.Rect(600, 240, 150, 50)
+    pygame.draw.rect(screen, GREEN, buy_second_weapon_button)
+    buy_second_weapon_text = font.render(f"Koupit druhou zbraň ({store['second_weapon_cost']})", True, WHITE)
+    screen.blit(buy_second_weapon_text, (buy_second_weapon_button.x + 10, buy_second_weapon_button.y + 10))
+
     pygame.display.flip()
 
-    return close_button
+    return close_button, buy_fire_rate_button, buy_penetration_button, buy_second_weapon_button
 
 # Hlavní smyčka
 running = True
@@ -114,11 +138,25 @@ while running:
 
     if in_store:
         # Pokud je hráč v obchodě, zobraz obchod
-        close_button = show_store()
+        close_button, buy_fire_rate_button, buy_penetration_button, buy_second_weapon_button = show_store()
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if close_button.collidepoint(event.pos):
                     in_store = False  # Zavření obchodu
+                elif buy_fire_rate_button.collidepoint(event.pos):
+                    if store["money"] >= store["fire_rate_upgrade_cost"]:
+                        store["money"] -= store["fire_rate_upgrade_cost"]
+                        store["fire_rate_upgrade_cost"] *= 1.2  # Zvýšení ceny o 20%
+                        player["fire_rate"] = int(player["fire_rate"] * 0.9)  # Zrychlení střelby o 10%
+                elif buy_penetration_button.collidepoint(event.pos):
+                    if store["money"] >= store["penetration_upgrade_cost"]:
+                        store["money"] -= store["penetration_upgrade_cost"]
+                        store["penetration_upgrade_cost"] *= 1.3  # Zvýšení ceny o 30%
+                        store["penetration_level"] += 1
+                elif buy_second_weapon_button.collidepoint(event.pos):
+                    if store["money"] >= store["second_weapon_cost"]:
+                        store["money"] -= store["second_weapon_cost"]
+                        store["second_weapon"] = True
             if event.type == pygame.QUIT:
                 running = False
                 in_store = False
