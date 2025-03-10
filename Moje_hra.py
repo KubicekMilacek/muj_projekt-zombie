@@ -82,7 +82,7 @@ def show_store():
     screen.blit(message, (WIDTH // 2 - 150, HEIGHT // 2))
 
     # Zobrazení měny
-    money_text = font.render(f"Měna: {store['money']}", True, WHITE)
+    money_text = font.render(f"Měna: {int(store['money'])}", True, WHITE)  # Zaokrouhlení měny na celé číslo
     screen.blit(money_text, (WIDTH // 2 - 50, HEIGHT // 2 - 40))
 
     # Vytvoření tabulky s upgrady
@@ -107,17 +107,17 @@ def show_store():
     # Tlačítka pro nákup
     buy_fire_rate_button = pygame.Rect(600, 100, 150, 50)
     pygame.draw.rect(screen, GREEN, buy_fire_rate_button)
-    buy_fire_rate_text = font.render(f"Koupit zrychlení ({store['fire_rate_upgrade_cost']})", True, WHITE)
+    buy_fire_rate_text = font.render(f"Koupit zrychlení ({int(store['fire_rate_upgrade_cost'])})", True, WHITE)  # Zaokrouhlení
     screen.blit(buy_fire_rate_text, (buy_fire_rate_button.x + 10, buy_fire_rate_button.y + 10))
 
     buy_penetration_button = pygame.Rect(600, 170, 150, 50)
     pygame.draw.rect(screen, GREEN, buy_penetration_button)
-    buy_penetration_text = font.render(f"Koupit penetraci ({store['penetration_upgrade_cost']})", True, WHITE)
+    buy_penetration_text = font.render(f"Koupit penetraci ({int(store['penetration_upgrade_cost'])})", True, WHITE)  # Zaokrouhlení
     screen.blit(buy_penetration_text, (buy_penetration_button.x + 10, buy_penetration_button.y + 10))
 
     buy_second_weapon_button = pygame.Rect(600, 240, 150, 50)
     pygame.draw.rect(screen, GREEN, buy_second_weapon_button)
-    buy_second_weapon_text = font.render(f"Koupit druhou zbraň ({store['second_weapon_cost']})", True, WHITE)
+    buy_second_weapon_text = font.render(f"Koupit druhou zbraň ({int(store['second_weapon_cost'])})", True, WHITE)  # Zaokrouhlení
     screen.blit(buy_second_weapon_text, (buy_second_weapon_button.x + 10, buy_second_weapon_button.y + 10))
 
     pygame.display.flip()
@@ -218,6 +218,7 @@ while running:
                         store["money"] += 8  # Fialoví zombíci dávají více peněz
                     else:
                         store["money"] += 1  # Běžní zombíci dávají 1 peníze
+                    store["money"] = round(store["money"])  # Zaokrouhlení měny na celé číslo
                     break
 
         # Zobrazení hráče
@@ -240,7 +241,7 @@ while running:
         screen.blit(lives_text, (10, 10))
 
         # Měna
-        money_text = font.render(f"Měna: {store['money']}", True, BLACK)
+        money_text = font.render(f"Měna: {int(store['money'])}", True, BLACK)  # Zaokrouhlení
         screen.blit(money_text, (150, 10))
 
         # Zbývající zombíci
