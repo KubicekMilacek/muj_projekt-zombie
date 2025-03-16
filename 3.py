@@ -15,6 +15,9 @@ background = pygame.image.load("background.png")
 # Načtení obrázku obchodu
 store_image = pygame.image.load("store.png")
 
+# Načtení obrázku bosse (žirafy)
+giraffe_boss_image = pygame.image.load("giraffe_boss.png")
+
 # Barvy
 WHITE = (255, 255, 255)
 RED = (200, 0, 0)
@@ -48,6 +51,9 @@ wave = {
     "speed_multiplier": 1.0
 }
 
+# Boss Fight
+boss = None
+
 # Obchod
 store = {
     "weapon_upgrade_cost": 10,
@@ -58,7 +64,6 @@ store = {
     "penetration_level": 0,
     "second_weapon": False
 }
-
 
 # Časovač
 clock = pygame.time.Clock()
@@ -123,6 +128,18 @@ def show_store():
     pygame.display.flip()
 
     return close_button, buy_fire_rate_button, buy_penetration_button, buy_second_weapon_button
+
+# Funkce pro začátek boss fightu
+def start_boss_fight():
+    global boss
+    boss = {
+        "x": WIDTH // 2,
+        "y": HEIGHT // 4,
+        "width": 100,
+        "height": 150,
+        "speed": 3,
+        "health": 50
+    }
 
 # Hlavní smyčka
 running = True
@@ -202,24 +219,10 @@ while running:
         # Pohyb zombíků
         for zombie in zombies[:]:
             zombie["x"] -= zombie["speed"]
-        if zombie["x"] < 70:
-            player["lives"] -= 1
-            zombies.remove(zombie)
-
-        # Kontrola prohry
-        if player["lives"] <= 0:
-            screen.fill((0, 0, 0))  # Černé pozadí
-            font = pygame.font.Font(None, 72)
-            defeat_text = font.render("DEFEAT", True, RED)
-            screen.blit(defeat_text, (WIDTH // 2 - 100, HEIGHT // 2))
-            pygame.display.flip()
-            pygame.time.delay(3000)  # Pauza 3 sekundy
-            
-            running = False
-            break  # Ukončíme cyklus, aby se program nepokračoval v iteraci
-
-
-
+            if zombie["x"] < 70:
+                player["lives"] -= 1
+                zombies.remove(zombie)
+                
         # Kolize střel a zombíků
         for bullet in bullets[:]:
             for zombie in zombies[:]:
@@ -272,6 +275,9 @@ while running:
             wave["zombies_left"] = 50
             wave["speed_multiplier"] *= 1.05  # Zrychlení zombíků o 5 %
 
+            # Každých 5 levelů boss fight
+            if wave["current"] % 5 == 0:
+                start_boss_fight()
 
             # Nabídka po vlně
             waiting = True
