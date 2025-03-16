@@ -91,15 +91,15 @@ def show_store():
     screen.blit(money_text, (WIDTH // 2 - 50, HEIGHT // 2 - 40))
 
     # Vytvoření tabulky s upgrady
-    upgrade_table_rect = pygame.Rect(100, HEIGHT // 2 + 50, 400, 200)
+    upgrade_table_rect = pygame.Rect(100, HEIGHT // 2 + 50, 800, 200)
     pygame.draw.rect(screen, WHITE, upgrade_table_rect)
     pygame.draw.rect(screen, BLACK, upgrade_table_rect, 3)  # Černé ohraničení tabulky
 
     # Popisky pro upgrady
     upgrades = [
-        ("Zrychlení střelby", store["fire_rate_upgrade_cost"], "Střelba bude rychlejší o 10%."),
-        ("Penetrace kulek", store["penetration_level"], "Kulka projde až dvěma zombíky."),
-        ("Druhá zbraň", store["second_weapon"], "Budeš střílet dva náboje nad sebou.")
+        ("Zrychlení střelby", store["fire_rate_upgrade_cost"], ),
+        ("Penetrace kulek", store["penetration_level"], ),
+        ("Druhá zbraň", store["second_weapon"], )
     ]
     
     # Zobrazit upgradey
