@@ -15,6 +15,9 @@ background = pygame.image.load("background.png")
 # Načtení obrázku obchodu
 store_image = pygame.image.load("store.png")
 
+# Načtení obrázku bosse (žirafy)
+giraffe_boss_image = pygame.image.load("giraffe_boss.png")
+
 # Barvy
 WHITE = (255, 255, 255)
 RED = (200, 0, 0)
@@ -29,7 +32,7 @@ player = {
     "width": 40,
     "height": 50,
     "speed": 5,
-    "lives": 3,
+    "lives": 10,
     "fire_rate": 500,  # 0.5 sekundy cooldown
     "last_shot": 0
 }
@@ -48,6 +51,9 @@ wave = {
     "speed_multiplier": 1.0
 }
 
+# Boss Fight
+boss = None
+
 # Obchod
 store = {
     "weapon_upgrade_cost": 10,
@@ -58,7 +64,6 @@ store = {
     "penetration_level": 0,
     "second_weapon": False
 }
-
 
 # Časovač
 clock = pygame.time.Clock()
@@ -76,25 +81,22 @@ def show_store():
     close_button = pygame.Rect(WIDTH - 40, 10, 30, 30)  # Červený křížek pro zavření
     pygame.draw.rect(screen, RED, close_button)  # Kreslení křížku
 
-    # Zobrazit text
-    font = pygame.font.Font(None, 36)
-    message = font.render("Zavřít obchod (klikněte na křížek)", True, WHITE)
-    screen.blit(message, (WIDTH // 2 - 150, HEIGHT // 2))
+
 
     # Zobrazení měny
     money_text = font.render(f"Měna: {int(store['money'])}", True, WHITE)  # Zaokrouhlení měny na celé číslo
     screen.blit(money_text, (WIDTH // 2 - 50, HEIGHT // 2 - 40))
 
     # Vytvoření tabulky s upgrady
-    upgrade_table_rect = pygame.Rect(100, HEIGHT // 2 + 50, 400, 200)
+    upgrade_table_rect = pygame.Rect(100, HEIGHT // 2 + 50, 500, 150)
     pygame.draw.rect(screen, WHITE, upgrade_table_rect)
     pygame.draw.rect(screen, BLACK, upgrade_table_rect, 3)  # Černé ohraničení tabulky
 
     # Popisky pro upgrady
     upgrades = [
-        ("Zrychlení střelby", store["fire_rate_upgrade_cost"], "Střelba bude rychlejší o 10%."),
-        ("Penetrace kulek", store["penetration_level"], "Kulka projde až dvěma zombíky."),
-        ("Druhá zbraň", store["second_weapon"], "Budeš střílet dva náboje nad sebou.")
+        ("Zrychlení střelby", store["fire_rate_upgrade_cost"]," "),
+        ("Penetrace kulek", store["penetration_level"]," " ),
+        ("Druhá zbraň", store["second_weapon"]," " )
     ]
     
     # Zobrazit upgradey
@@ -105,17 +107,17 @@ def show_store():
         y_offset += 40
 
     # Tlačítka pro nákup
-    buy_fire_rate_button = pygame.Rect(600, 100, 150, 50)
+    buy_fire_rate_button = pygame.Rect(100, 100, 250, 50)
     pygame.draw.rect(screen, GREEN, buy_fire_rate_button)
     buy_fire_rate_text = font.render(f"Koupit zrychlení ({int(store['fire_rate_upgrade_cost'])})", True, WHITE)  # Zaokrouhlení
     screen.blit(buy_fire_rate_text, (buy_fire_rate_button.x + 10, buy_fire_rate_button.y + 10))
 
-    buy_penetration_button = pygame.Rect(600, 170, 150, 50)
+    buy_penetration_button = pygame.Rect(100, 170, 250, 50)
     pygame.draw.rect(screen, GREEN, buy_penetration_button)
     buy_penetration_text = font.render(f"Koupit penetraci ({int(store['penetration_upgrade_cost'])})", True, WHITE)  # Zaokrouhlení
     screen.blit(buy_penetration_text, (buy_penetration_button.x + 10, buy_penetration_button.y + 10))
 
-    buy_second_weapon_button = pygame.Rect(600, 240, 150, 50)
+    buy_second_weapon_button = pygame.Rect(100, 240, 250, 50)
     pygame.draw.rect(screen, GREEN, buy_second_weapon_button)
     buy_second_weapon_text = font.render(f"Koupit druhou zbraň ({int(store['second_weapon_cost'])})", True, WHITE)  # Zaokrouhlení
     screen.blit(buy_second_weapon_text, (buy_second_weapon_button.x + 10, buy_second_weapon_button.y + 10))
@@ -123,6 +125,18 @@ def show_store():
     pygame.display.flip()
 
     return close_button, buy_fire_rate_button, buy_penetration_button, buy_second_weapon_button
+
+# Funkce pro začátek boss fightu
+def start_boss_fight():
+    global boss
+    boss = {
+        "x": WIDTH // 2,
+        "y": HEIGHT // 4,
+        "width": 100,
+        "height": 150,
+        "speed": 3,
+        "health": 50
+    }
 
 # Hlavní smyčka
 running = True
@@ -205,7 +219,7 @@ while running:
             if zombie["x"] < 70:
                 player["lives"] -= 1
                 zombies.remove(zombie)
-
+                
         # Kolize střel a zombíků
         for bullet in bullets[:]:
             for zombie in zombies[:]:
@@ -215,9 +229,9 @@ while running:
                     
                     # Výplata peněz
                     if zombie["is_purple"]:
-                        store["money"] += 8  # Fialoví zombíci dávají více peněz
+                        store["money"] += 3  # Fialoví zombíci dávají více peněz
                     else:
-                        store["money"] += 1  # Běžní zombíci dávají 1 peníze
+                        store["money"] += 0,5  # Běžní zombíci dávají 1 peníz
                     store["money"] = round(store["money"])  # Zaokrouhlení měny na celé číslo
                     break
 
@@ -258,6 +272,9 @@ while running:
             wave["zombies_left"] = 50
             wave["speed_multiplier"] *= 1.05  # Zrychlení zombíků o 5 %
 
+            # Každých 5 levelů boss fight
+            if wave["current"] % 5 == 0:
+                start_boss_fight()
 
             # Nabídka po vlně
             waiting = True
